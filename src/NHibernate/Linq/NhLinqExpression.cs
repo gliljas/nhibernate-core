@@ -8,12 +8,13 @@ using NHibernate.Hql.Ast.ANTLR.Tree;
 using NHibernate.Linq.Visitors;
 using NHibernate.Param;
 using NHibernate.Type;
+using Remotion.Linq;
 
 namespace NHibernate.Linq
 {
 	public class NhLinqExpression : IQueryExpression
 	{
-		public string Key { get; private set; }
+		public string Key { get; protected set; }
 
 		public System.Type Type { get; private set; }
 
@@ -64,11 +65,17 @@ namespace NHibernate.Linq
 			var queryModel = NhRelinqQueryParser.Parse(_expression);
 			var visitorParameters = new VisitorParameters(sessionFactory, _constantToParameterMap, requiredHqlParameters, querySourceNamer);
 
-			ExpressionToHqlTranslationResults = QueryModelVisitor.GenerateHqlQuery(queryModel, visitorParameters, true);
+			ExpressionToHqlTranslationResults = GenerateHqlQuery(queryModel, visitorParameters);
 
 			ParameterDescriptors = requiredHqlParameters.AsReadOnly();
 			
 			return ExpressionToHqlTranslationResults.Statement.AstNode;
+		}
+
+		protected virtual ExpressionToHqlTranslationResults GenerateHqlQuery(QueryModel queryModel, VisitorParameters visitorParameters)
+		{
+			visitorParameters.EntityType = Type;
+			return QueryModelVisitor.GenerateHqlQuery(queryModel, visitorParameters, true, QueryMode.Select);
 		}
 
 		internal void CopyExpressionTranslation(NhLinqExpression other)

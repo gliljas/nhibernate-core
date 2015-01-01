@@ -56,6 +56,7 @@ namespace NHibernate.Hql.Ast.ANTLR
 		private IASTFactory _nodeFactory;
 		private readonly List<AssignmentSpecification> assignmentSpecifications = new List<AssignmentSpecification>();
 		private int numberOfParametersInSetClause;
+		private Stack<int> clauseStack=new Stack<int>();
 
 		public HqlSqlWalker(QueryTranslatorImpl qti,
 					  ISessionFactoryImplementor sfi,
@@ -79,7 +80,7 @@ namespace NHibernate.Hql.Ast.ANTLR
 		/*
 		protected override void Mismatch(IIntStream input, int ttype, BitSet follow)
 		{
-		   throw new MismatchedTokenException(ttype, input);
+			throw new MismatchedTokenException(ttype, input);
 		}
 
 		public override object RecoverFromMismatchedSet(IIntStream input, RecognitionException e, BitSet follow)
@@ -113,10 +114,10 @@ namespace NHibernate.Hql.Ast.ANTLR
 			get { return _querySpaces; }
 		}
 
-	    public IDictionary<string, object> NamedParameters
-	    {
-            get { return _namedParameters; }
-	    }
+		 public IDictionary<string, object> NamedParameters
+		 {
+				get { return _namedParameters; }
+		 }
 
 		internal SessionFactoryHelperExtensions SessionFactoryHelper
 		{
@@ -401,7 +402,17 @@ namespace NHibernate.Hql.Ast.ANTLR
 
 		void HandleClauseStart(int clauseType)
 		{
+			clauseStack.Push(_currentClauseType);
 			_currentClauseType = clauseType;
+		}
+
+		void HandleClauseEnd(int clauseType)
+		{
+			if (clauseType != _currentClauseType)
+			{
+				throw new SemanticException("Mismatched clause parsing");
+			}
+			_currentClauseType=clauseStack.Pop();
 		}
 
 		IASTNode CreateIntoClause(string path, IASTNode propertySpec)
@@ -617,8 +628,8 @@ namespace NHibernate.Hql.Ast.ANTLR
 				IASTNode fromElement = (IASTNode)adaptor.Create(FILTER_ENTITY, collectionElementEntityName);
 				IASTNode alias = (IASTNode)adaptor.Create(ALIAS, "this");
 
-                ((HqlSqlWalkerTreeNodeStream)input).InsertChild(fromClauseInput, fromElement);
-                ((HqlSqlWalkerTreeNodeStream)input).InsertChild(fromClauseInput, alias);
+					 ((HqlSqlWalkerTreeNodeStream)input).InsertChild(fromClauseInput, fromElement);
+					 ((HqlSqlWalkerTreeNodeStream)input).InsertChild(fromClauseInput, alias);
 
 //				fromClauseInput.AddChild(fromElement);
 //				fromClauseInput.AddChild(alias);
@@ -704,12 +715,12 @@ namespace NHibernate.Hql.Ast.ANTLR
 
 		IASTNode CreateFromElement(string path, IASTNode pathNode, IASTNode alias, IASTNode propertyFetch)
 		{
-            FromElement fromElement = _currentFromClause.AddFromElement(path, alias);
-            fromElement.SetAllPropertyFetch(propertyFetch != null);
-            return fromElement;
+				FromElement fromElement = _currentFromClause.AddFromElement(path, alias);
+				fromElement.SetAllPropertyFetch(propertyFetch != null);
+				return fromElement;
 		}
 
-	    IASTNode CreateFromFilterElement(IASTNode filterEntity, IASTNode alias)
+		 IASTNode CreateFromFilterElement(IASTNode filterEntity, IASTNode alias)
 		{
 			FromElement fromElement = _currentFromClause.AddFromElement(filterEntity.Text, alias);
 			FromClause fromClause = fromElement.FromClause;
@@ -729,7 +740,7 @@ namespace NHibernate.Hql.Ast.ANTLR
 			{
 				join.AddJoin((IAssociationType)persister.ElementType,
 						fromElement.TableAlias,
-					 	JoinType.InnerJoin,
+						JoinType.InnerJoin,
 						persister.GetElementColumnNames(fkTableAlias));
 			}
 
@@ -948,8 +959,8 @@ namespace NHibernate.Hql.Ast.ANTLR
 				// Note: once we add support for "JOIN ... ON ...",
 				// the ON clause needs to get included here
 				return CurrentClauseType == WHERE ||
-					   CurrentClauseType == WITH ||
-					   IsInCase;
+						CurrentClauseType == WITH ||
+						IsInCase;
 			}
 		}
 

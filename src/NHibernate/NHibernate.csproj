@@ -281,6 +281,7 @@
     <Compile Include="ISessionFactory.cs" />
     <Compile Include="ITransaction.cs" />
     <Compile Include="LazyInitializationException.cs" />
+    <Compile Include="Linq\Assignment.cs" />
     <Compile Include="Linq\Clauses\NhHavingClause.cs" />
     <Compile Include="Linq\Clauses\NhJoinClause.cs" />
     <Compile Include="Linq\Clauses\NhWithClause.cs" />
@@ -292,10 +293,17 @@
     <Compile Include="Linq\Functions\DictionaryGenerator.cs" />
     <Compile Include="Linq\Functions\EqualsGenerator.cs" />
     <Compile Include="Linq\GroupBy\PagingRewriter.cs" />
+    <Compile Include="Linq\InsertSyntax.cs" />
     <Compile Include="Linq\NestedSelects\NestedSelectDetector.cs" />
     <Compile Include="Linq\NestedSelects\Tuple.cs" />
     <Compile Include="Linq\NestedSelects\SelectClauseRewriter.cs" />
     <Compile Include="Linq\NestedSelects\ExpressionHolder.cs" />
+    <Compile Include="Linq\NhLinqDeleteExpression.cs" />
+    <Compile Include="Linq\NhLinqInsertExpression.cs" />
+    <Compile Include="Linq\NhLinqUpdateExpression.cs" />
+    <Compile Include="Linq\QueryMode.cs" />
+    <Compile Include="Linq\Assignments.cs" />
+    <Compile Include="Linq\UpdateSyntax.cs" />
     <Compile Include="Linq\Visitors\LeftJoinRewriter.cs" />
     <Compile Include="Linq\Functions\CompareGenerator.cs" />
     <Compile Include="Linq\ExpressionTransformers\SimplifyCompareTransformer.cs" />

@@ -87,6 +87,7 @@ intoClause!
 	}
 	: ^( INTO { HandleClauseStart( INTO ); } (p=path) ps=insertablePropertySpec ) 
 	;
+	finally {HandleClauseEnd( INTO );}
 
 insertablePropertySpec
 	: ^( RANGE (IDENT)+ )
@@ -95,6 +96,7 @@ insertablePropertySpec
 setClause
 	: ^( SET { HandleClauseStart( SET ); } (assignment)* )
 	;
+	finally {HandleClauseEnd( SET );}
 
 assignment
 	@after {
@@ -143,6 +145,7 @@ unionedQuery!
 orderClause
 	: ^(ORDER { HandleClauseStart( ORDER ); } (orderExprs | query (ASCENDING | DESCENDING)? ))
 	;
+	finally {HandleClauseEnd( ORDER );}
 
 orderExprs
 	: expr ( ASCENDING | DESCENDING )? (orderExprs)?
@@ -159,6 +162,7 @@ takeClause
 groupClause
 	: ^(GROUP { HandleClauseStart( GROUP ); } (expr)+ )
 	;
+	finally {HandleClauseEnd( GROUP );}
 
 havingClause
 	: ^(HAVING logicalExpr)
@@ -168,6 +172,7 @@ selectClause!
 	: ^(SELECT { HandleClauseStart( SELECT ); BeforeSelectClause(); } (d=DISTINCT)? x=selectExprList ) 
 	-> ^(SELECT_CLAUSE["{select clause}"] $d? $x)
 	;
+	finally {HandleClauseEnd( SELECT );}
 
 selectExprList @init{
 		bool oldInSelect = _inSelect;
@@ -222,6 +227,7 @@ fromClause
 	}
 	: ^(f=FROM { PushFromClause($f.tree); HandleClauseStart( FROM ); } fromElementList )
 	;
+	finally {HandleClauseEnd( FROM );}
 
 fromElementList @init{
 		bool oldInFrom = _inFrom;
@@ -305,11 +311,13 @@ withClause
 	: ^(w=WITH { HandleClauseStart( WITH ); } b=logicalExpr ) 
 	-> ^($w $b)
 	;
+	finally {HandleClauseEnd( WITH );}
 
 whereClause
 	: ^(w=WHERE { HandleClauseStart( WHERE ); } b=logicalExpr ) 
 	-> ^($w $b)
 	;
+	finally {HandleClauseEnd( WHERE );}
 
 logicalExpr
 	: ^(AND logicalExpr logicalExpr)

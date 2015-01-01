@@ -98,5 +98,45 @@ namespace NHibernate.Linq
 
 			return (IFutureValue<TResult>) provider.ExecuteFuture(expression);
 		}
+
+		
+		/// <summary>
+		/// Deletes all entities in the specified query. The delete operation is performed in the database.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="query">The query.</param>
+		/// <returns></returns>
+		public static int Delete<T>(this IQueryable<T> query)
+		{
+			var nhQueryable = query as QueryableBase<T>;
+			if (nhQueryable == null)
+				throw new NotSupportedException("Query needs to be of type QueryableBase<T>");
+
+			var provider =nhQueryable.Provider as DefaultQueryProvider;
+			return provider.ExecuteDelete(query.Expression);
+		}
+
+		/// <summary>
+		/// Updates the entities in the query, using the specified assignments. The update operation is performed in the database.
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <param name="query">The query.</param>
+		/// <returns></returns>
+		public static UpdateSyntax<T> Update<T>(this IQueryable<T> query)
+		{
+			return new UpdateSyntax<T>(query);
+		}
+
+		/// <summary>
+		/// Inserts new entities into the database, using other stored entities as a source. Uses INSERT INTO [...] SELECT FROM [...] in the database.
+		/// </summary>
+		/// <typeparam name="TInput">The type of the input.</typeparam>
+		/// <param name="query">The query.</param>
+		/// <returns></returns>
+		public static InsertSyntax<TInput> Insert<TInput>(this IQueryable<TInput> query)
+		{
+			return new InsertSyntax<TInput>(query);
+		}
+		
 	}
 }

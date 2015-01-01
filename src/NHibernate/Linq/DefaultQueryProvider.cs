@@ -7,6 +7,7 @@ using System.Reflection;
 using NHibernate.Engine;
 using NHibernate.Impl;
 using NHibernate.Type;
+using Remotion.Linq;
 
 namespace NHibernate.Linq
 {
@@ -43,14 +44,14 @@ namespace NHibernate.Linq
 
 		public TResult Execute<TResult>(Expression expression)
 		{
-			return (TResult) Execute(expression);
+			return (TResult)Execute(expression);
 		}
 
 		public virtual IQueryable CreateQuery(Expression expression)
 		{
 			MethodInfo m = CreateQueryMethodDefinition.MakeGenericMethod(expression.Type.GetGenericArguments()[0]);
 
-			return (IQueryable) m.Invoke(this, new object[] {expression});
+			return (IQueryable)m.Invoke(this, new object[] { expression });
 		}
 
 		public virtual IQueryable<T> CreateQuery<T>(Expression expression)
@@ -72,7 +73,7 @@ namespace NHibernate.Linq
 
 			query = Session.CreateQuery(nhLinqExpression);
 
-			nhQuery = (NhLinqExpression) ((ExpressionQueryImpl) query).QueryExpression;
+			nhQuery = (NhLinqExpression)((ExpressionQueryImpl)query).QueryExpression;
 
 			SetParameters(query, nhLinqExpression.ParameterValuesByName);
 			SetResultTransformerAndAdditionalCriteria(query, nhQuery, nhLinqExpression.ParameterValuesByName);
@@ -84,18 +85,18 @@ namespace NHibernate.Linq
 			MethodInfo method;
 			if (nhLinqExpression.ReturnType == NhLinqExpressionReturnType.Sequence)
 			{
-				method = typeof (IQuery).GetMethod("Future").MakeGenericMethod(nhQuery.Type);
+				method = typeof(IQuery).GetMethod("Future").MakeGenericMethod(nhQuery.Type);
 			}
 			else
 			{
-				method = typeof (IQuery).GetMethod("FutureValue").MakeGenericMethod(nhQuery.Type);
+				method = typeof(IQuery).GetMethod("FutureValue").MakeGenericMethod(nhQuery.Type);
 			}
 
 			object result = method.Invoke(query, new object[0]);
 
 			if (nhQuery.ExpressionToHqlTranslationResults.PostExecuteTransformer != null)
 			{
-				((IDelayedValue) result).ExecuteOnEval = nhQuery.ExpressionToHqlTranslationResults.PostExecuteTransformer;
+				((IDelayedValue)result).ExecuteOnEval = nhQuery.ExpressionToHqlTranslationResults.PostExecuteTransformer;
 			}
 
 			return result;
@@ -169,6 +170,39 @@ namespace NHibernate.Linq
 			{
 				criteria(query, parameters);
 			}
+		}
+
+		public int ExecuteDelete(Expression predicate)
+		{
+			var nhLinqExpression = new NhLinqDeleteExpression(predicate, Session.Factory);
+
+			var query = Session.CreateQuery(nhLinqExpression);
+
+			SetParameters(query, nhLinqExpression.ParameterValuesByName);
+
+			return query.ExecuteUpdate();
+		}
+
+		public int ExecuteUpdate<T>(QueryableBase<T> queryable, Assignments<T, T> assignments, bool versioned)
+		{
+			var nhLinqExpression = new NhLinqUpdateExpression<T>(queryable.Expression, assignments, Session.Factory, versioned);
+
+			var query = Session.CreateQuery(nhLinqExpression);
+
+			SetParameters(query, nhLinqExpression.ParameterValuesByName);
+
+			return query.ExecuteUpdate();
+		}
+
+		public int ExecuteInsert<TInput, TOutput>(QueryableBase<TInput> nhQueryable, Assignments<TInput, TOutput> assignments)
+		{
+			var nhLinqExpression = new NhLinqInsertExpression<TInput, TOutput>(nhQueryable.Expression, assignments, Session.Factory);
+
+			var query = Session.CreateQuery(nhLinqExpression);
+
+			SetParameters(query, nhLinqExpression.ParameterValuesByName);
+
+			return query.ExecuteUpdate();
 		}
 	}
 }
