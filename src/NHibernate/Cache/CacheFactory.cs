@@ -76,7 +76,7 @@ namespace NHibernate.Cache
 			{
 				throw new HibernateException("Could not instantiate cache implementation", e);
 			}
-			ccs.Cache = impl;
+			ccs.Cache = new TransactionScopedCache(impl);
 
 			return ccs;
 		}
