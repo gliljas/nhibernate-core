@@ -103,5 +103,33 @@ namespace NHibernate.Linq
 
 			return (IFutureValue<TResult>) provider.ExecuteFuture(expression);
 		}
+
+		public static IQueryable<T> ReadOnly<T>(this IQueryable<T> query, bool readOnly = true)
+		{
+			var method = ReflectionHelper.GetMethodDefinition(() => ReadOnly<object>(null, readOnly)).MakeGenericMethod(typeof(T));
+
+			var callExpression = Expression.Call(method, query.Expression, Expression.Constant(readOnly));
+
+			return new NhQueryable<T>(query.Provider, callExpression);
+		}
+
+		public static IQueryable<T> LockMode<T>(this IQueryable<T> query, LockMode lockMode)
+		{
+			var method = ReflectionHelper.GetMethodDefinition(() => LockMode<object>(null, lockMode)).MakeGenericMethod(typeof(T));
+
+			var callExpression = Expression.Call(method, query.Expression, Expression.Constant(lockMode));
+
+			return new NhQueryable<T>(query.Provider, callExpression);
+		}
+
+		public static IQueryable<T> Comment<T>(this IQueryable<T> query, string comment)
+		{
+			var method = ReflectionHelper.GetMethodDefinition(() => Comment<T>(null, comment)).MakeGenericMethod(typeof(T));
+
+			var callExpression = Expression.Call(method, query.Expression, Expression.Constant(comment));
+
+			return new NhQueryable<T>(query.Provider, callExpression);
+		}
+
 	}
 }

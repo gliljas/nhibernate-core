@@ -84,7 +84,7 @@ namespace NHibernate.Linq.Visitors
 				RewrittenOperatorResult = result,
 			};
 			visitor.Visit();
-
+		
 			return visitor._hqlTree.GetTranslation();
 		}
 
@@ -122,8 +122,6 @@ namespace NHibernate.Linq.Visitors
 			ResultOperatorMap.Add<AllResultOperator, ProcessAll>();
 			ResultOperatorMap.Add<FetchOneRequest, ProcessFetchOne>();
 			ResultOperatorMap.Add<FetchManyRequest, ProcessFetchMany>();
-			ResultOperatorMap.Add<CacheableResultOperator, ProcessCacheable>();
-			ResultOperatorMap.Add<TimeoutResultOperator, ProcessTimeout>();
 			ResultOperatorMap.Add<OfTypeResultOperator, ProcessOfType>();
 			ResultOperatorMap.Add<CastResultOperator, ProcessCast>();
 		}

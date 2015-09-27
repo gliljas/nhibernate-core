@@ -306,6 +306,7 @@
     <Compile Include="Linq\NestedSelects\Tuple.cs" />
     <Compile Include="Linq\NestedSelects\SelectClauseRewriter.cs" />
     <Compile Include="Linq\NestedSelects\ExpressionHolder.cs" />
+    <Compile Include="Linq\QueryOptions.cs" />
     <Compile Include="Linq\ReWriters\ArrayIndexExpressionFlattener.cs" />
     <Compile Include="Linq\Visitors\IQueryModelRewriterFactory.cs" />
     <Compile Include="Linq\QueryProviderFactory.cs" />
@@ -324,9 +325,9 @@
     <Compile Include="Linq\Visitors\PagingRewriterSelectClauseVisitor.cs" />
     <Compile Include="Linq\Visitors\PossibleValueSet.cs" />
     <Compile Include="Linq\Visitors\QueryExpressionSourceIdentifer.cs" />
+    <Compile Include="Linq\Visitors\QueryOptionExtractionVisitor.cs" />
     <Compile Include="Linq\Visitors\QuerySourceIdentifier.cs" />
     <Compile Include="Linq\Visitors\MemberExpressionJoinDetector.cs" />
-    <Compile Include="Linq\Visitors\ResultOperatorProcessors\ProcessTimeout.cs" />
     <Compile Include="Linq\Visitors\ResultOperatorProcessors\ProcessAggregateFromSeed.cs" />
     <Compile Include="Linq\NestedSelects\NestedSelectRewriter.cs" />
     <Compile Include="Linq\Visitors\SelectClauseNominator.cs" />
@@ -1003,7 +1004,6 @@
     <Compile Include="Linq\IntermediateHqlTree.cs" />
     <Compile Include="Linq\Visitors\ResultOperatorProcessors\ProcessCast.cs" />
     <Compile Include="Linq\Visitors\ResultOperatorProcessors\ProcessOfType.cs" />
-    <Compile Include="Linq\Visitors\ResultOperatorProcessors\ProcessCacheable.cs" />
     <Compile Include="Linq\Visitors\QuerySourceLocator.cs" />
     <Compile Include="Linq\Visitors\ResultOperatorProcessors\ProcessFetch.cs" />
     <Compile Include="Linq\Visitors\ResultOperatorProcessors\ProcessFetchMany.cs" />

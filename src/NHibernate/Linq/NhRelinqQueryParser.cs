@@ -58,24 +58,9 @@ namespace NHibernate.Linq
 			methodInfoRegistry.Register(
 				new[]
 					{
-						typeof(LinqExtensionMethods).GetMethod("Cacheable"),
-						typeof(LinqExtensionMethods).GetMethod("CacheMode"),
-						typeof(LinqExtensionMethods).GetMethod("CacheRegion"),
-					}, typeof(CacheableExpressionNode));
-
-			methodInfoRegistry.Register(
-				new[]
-					{
 						ReflectionHelper.GetMethodDefinition(() => Queryable.AsQueryable(null)),
 						ReflectionHelper.GetMethodDefinition(() => Queryable.AsQueryable<object>(null)),
 					}, typeof(AsQueryableExpressionNode)
-				);
-
-			methodInfoRegistry.Register(
-				new[]
-					{
-						ReflectionHelper.GetMethodDefinition(() => LinqExtensionMethods.Timeout<object>(null, 0)),
-					}, typeof (TimeoutExpressionNode)
 				);
 
 			var nodeTypeProvider = ExpressionTreeParser.CreateDefaultNodeTypeProvider();
@@ -114,112 +99,5 @@ namespace NHibernate.Linq
 			return queryModel;
 		}
 	}
-
-	public class CacheableExpressionNode : ResultOperatorExpressionNodeBase
-	{
-		private readonly MethodCallExpressionParseInfo _parseInfo;
-		private readonly ConstantExpression _data;
-
-		public CacheableExpressionNode(MethodCallExpressionParseInfo parseInfo, ConstantExpression data) : base(parseInfo, null, null)
-		{
-			_parseInfo = parseInfo;
-			_data = data;
-		}
-
-		public override Expression Resolve(ParameterExpression inputParameter, Expression expressionToBeResolved, ClauseGenerationContext clauseGenerationContext)
-		{
-			return Source.Resolve(inputParameter, expressionToBeResolved, clauseGenerationContext);
-		}
-
-		protected override ResultOperatorBase CreateResultOperator(ClauseGenerationContext clauseGenerationContext)
-		{
-			return new CacheableResultOperator(_parseInfo, _data);
-		}
-	}
-
-	public class CacheableResultOperator : ResultOperatorBase
-	{
-		public MethodCallExpressionParseInfo ParseInfo { get; private set; }
-		public ConstantExpression Data { get; private set; }
-
-		public CacheableResultOperator(MethodCallExpressionParseInfo parseInfo, ConstantExpression data)
-		{
-			ParseInfo = parseInfo;
-			Data = data;
-		}
-
-		public override IStreamedData ExecuteInMemory(IStreamedData input)
-		{
-			throw new NotImplementedException();
-		}
-
-		public override IStreamedDataInfo GetOutputDataInfo(IStreamedDataInfo inputInfo)
-		{
-			return inputInfo;
-		}
-
-		public override ResultOperatorBase Clone(CloneContext cloneContext)
-		{
-			throw new NotImplementedException();
-		}
-
-		public override void TransformExpressions(Func<Expression, Expression> transformation)
-		{
-		}
-	}
-
-
-	internal class TimeoutExpressionNode : ResultOperatorExpressionNodeBase
-	{
-		private readonly MethodCallExpressionParseInfo _parseInfo;
-		private readonly ConstantExpression _timeout;
-
-		public TimeoutExpressionNode(MethodCallExpressionParseInfo parseInfo, ConstantExpression timeout)
-			: base(parseInfo, null, null)
-		{
-			_parseInfo = parseInfo;
-			_timeout = timeout;
-		}
-
-		public override Expression Resolve(ParameterExpression inputParameter, Expression expressionToBeResolved, ClauseGenerationContext clauseGenerationContext)
-		{
-			return Source.Resolve(inputParameter, expressionToBeResolved, clauseGenerationContext);
-		}
-
-		protected override ResultOperatorBase CreateResultOperator(ClauseGenerationContext clauseGenerationContext)
-		{
-			return new TimeoutResultOperator(_parseInfo, _timeout);
-		}
-	}
-
-	internal class TimeoutResultOperator : ResultOperatorBase
-	{
-		public MethodCallExpressionParseInfo ParseInfo { get; private set; }
-		public ConstantExpression Timeout { get; private set; }
-
-		public TimeoutResultOperator(MethodCallExpressionParseInfo parseInfo, ConstantExpression timeout)
-		{
-			ParseInfo = parseInfo;
-			Timeout = timeout;
-		}
-
-		public override IStreamedData ExecuteInMemory(IStreamedData input)
-		{
-			throw new NotImplementedException();
-		}
-
-		public override IStreamedDataInfo GetOutputDataInfo(IStreamedDataInfo inputInfo)
-		{
-			return inputInfo;
-		}
-
-		public override ResultOperatorBase Clone(CloneContext cloneContext)
-		{
-			throw new NotImplementedException();
-		}
-
-		public override void TransformExpressions(Func<Expression, Expression> transformation)
-		{
-		}
-	}
+	
 }

@@ -8,6 +8,7 @@ using NHibernate.Hql.Ast.ANTLR.Tree;
 using NHibernate.Linq.Visitors;
 using NHibernate.Param;
 using NHibernate.Type;
+using Remotion.Linq;
 
 namespace NHibernate.Linq
 {
@@ -25,13 +26,24 @@ namespace NHibernate.Linq
 
 		public ExpressionToHqlTranslationResults ExpressionToHqlTranslationResults { get; private set; }
 
+		public QueryOptions Options
+		{
+			get { return _queryOptions; }
+		}
+
 		internal Expression _expression;
 		internal IDictionary<ConstantExpression, NamedParameter> _constantToParameterMap;
-
+		private readonly QueryOptions _queryOptions;
+		
 		public NhLinqExpression(Expression expression, ISessionFactoryImplementor sessionFactory)
 		{
+			_queryOptions = new QueryOptions();
+
 			_expression = NhPartialEvaluatingExpressionTreeVisitor.EvaluateIndependentSubtrees(expression);
 
+			_expression = QueryOptionExtractionVisitor.ExtractOptions(expression, _queryOptions);
+
+			
 			// We want logging to be as close as possible to the original expression sent from the
 			// application. But if we log before partial evaluation, the log won't include e.g.
 			// subquery expressions if those are defined by the application in a variable referenced
@@ -62,18 +74,24 @@ namespace NHibernate.Linq
 			var requiredHqlParameters = new List<NamedParameterDescriptor>();
 			var querySourceNamer = new QuerySourceNamer();
 			var queryModel = NhRelinqQueryParser.Parse(_expression);
+
 			var visitorParameters = new VisitorParameters(sessionFactory, _constantToParameterMap, requiredHqlParameters, querySourceNamer);
 
 			ExpressionToHqlTranslationResults = QueryModelVisitor.GenerateHqlQuery(queryModel, visitorParameters, true);
 
 			ParameterDescriptors = requiredHqlParameters.AsReadOnly();
-			
+
+			MainFromClauseItemName = queryModel.MainFromClause.ItemName;
+
 			return ExpressionToHqlTranslationResults.Statement.AstNode;
 		}
+
+		public string MainFromClauseItemName { get; set; }
 
 		internal void CopyExpressionTranslation(NhLinqExpression other)
 		{
 			ExpressionToHqlTranslationResults = other.ExpressionToHqlTranslationResults;
+			MainFromClauseItemName = other.MainFromClauseItemName;
 			ParameterDescriptors = other.ParameterDescriptors;
 		}
 	}
