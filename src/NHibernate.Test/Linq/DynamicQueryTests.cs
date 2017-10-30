@@ -24,7 +24,7 @@ namespace NHibernate.Test.Linq
 		{
 			//dynamic orderby clause
 			var users = db.Users
-				.SetOptions(o => o.SetCacheable(true))
+				.WithOptions(QueryCache.Enabled)
 				.Fetch(x => x.Role)
 				.OrderBy("RegisteredAt");
 

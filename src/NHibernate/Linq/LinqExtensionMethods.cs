@@ -2447,21 +2447,54 @@ namespace NHibernate.Linq
 		}
 
 
-		internal static readonly MethodInfo SetOptionsDefinition =
-			ReflectHelper.GetMethodDefinition(() => SetOptions<object>(null, null));
+		internal static readonly MethodInfo WithOptionsDefinition =
+			ReflectHelper.GetMethodDefinition(() => WithOptions<object>(null, null));
 
 		/// <summary>
 		/// Allow to set NHibernate query options.
 		/// </summary>
 		/// <typeparam name="T">The type of the queried elements.</typeparam>
 		/// <param name="query">The query on which to set options.</param>
-		/// <param name="setOptions">The options setter.</param>
+		/// <param name="options">The options.</param>
 		/// <returns>The query altered with the options.</returns>
+		public static IQueryable<T> WithOptions<T>(this IQueryable<T> query, params QueryOptions[] options)
+		{
+			var method = WithOptionsDefinition.MakeGenericMethod(typeof(T));
+			var callExpression = Expression.Call(method, query.Expression, Expression.Constant(options));
+			return new NhQueryable<T>(query.Provider, callExpression);
+		}
+
+		[Obsolete("Please use WithOptions instead.")]
 		public static IQueryable<T> SetOptions<T>(this IQueryable<T> query, Action<IQueryableOptions> setOptions)
 		{
-			var method = SetOptionsDefinition.MakeGenericMethod(typeof(T));
-			var callExpression = Expression.Call(method, query.Expression, Expression.Constant(setOptions));
-			return new NhQueryable<T>(query.Provider, callExpression);
+			var options = new List<QueryOptions>();
+			var oldOptions=new NhQueryableOptions();
+			setOptions(oldOptions);
+			if (oldOptions.Cacheable.HasValue)
+			{
+				if (oldOptions.Cacheable.Value)
+				{
+					var queryOption = QueryCache.Enabled;
+					if (oldOptions.CacheRegion != null)
+					{
+						queryOption.InRegion(oldOptions.CacheRegion);
+					}
+					if (oldOptions.CacheMode != null)
+					{
+						queryOption.WithMode(oldOptions.CacheMode.Value);
+					}
+					options.Add(queryOption);
+				}
+				else
+				{
+					options.Add(QueryCache.Disabled);
+				}
+			}
+			if (oldOptions.Timeout.HasValue)
+			{
+				options.Add(CommandTimeout.InSeconds(oldOptions.Timeout.Value));
+			}
+			return query.WithOptions(options.ToArray());
 		}
 
 		// Since v5
@@ -2482,7 +2515,7 @@ namespace NHibernate.Linq
 		// Since v5
 		[Obsolete("Please use SetOptions instead.")]
 		public static IQueryable<T> Timeout<T>(this IQueryable<T> query, int timeout)
-			=> query.SetOptions(o => o.SetTimeout(timeout));
+			=> query.WithOptions(CommandTimeout.InSeconds(timeout));
 
 		/// <summary>
 		/// Allows to specify the parameter NHibernate type to use for a literal in a queryable expression.
@@ -2508,6 +2541,92 @@ namespace NHibernate.Linq
 				throw new NotSupportedException($"Source {nameof(source.Provider)} must be a {nameof(INhQueryProvider)}");
 			}
 			return provider;
+		}
+	}
+
+	public interface IQueryOptions
+	{
+		void Apply(IQuery query);
+	}
+
+	public abstract class QueryOptions : IQueryOptions
+	{
+		void IQueryOptions.Apply(IQuery query)
+		{
+			ApplyToQuery(query);
+		}
+
+		protected virtual void ApplyToQuery(IQuery query)
+		{
+		}
+	}
+
+	public static class QueryCache
+	{
+		public static QueryCacheEnabledOptions Enabled => new QueryCacheEnabledOptions();
+		public static QueryCacheDisabledOptions Disabled => new QueryCacheDisabledOptions();
+	}
+
+	public class QueryCacheDisabledOptions : QueryOptions
+	{
+		protected override void ApplyToQuery(IQuery query)
+		{
+			query.SetCacheable(false);
+		}
+	}
+
+
+
+	public class QueryCacheEnabledOptions : QueryOptions
+	{
+		private CacheMode? _mode;
+		private string _region;
+
+		public QueryCacheEnabledOptions WithMode(CacheMode mode)
+		{
+			_mode = mode;
+			return this;
+		}
+
+		public QueryCacheEnabledOptions InRegion(string region)
+		{
+			_region = region;
+			return this;
+		}
+
+		protected override void ApplyToQuery(IQuery query)
+		{
+			query.SetCacheable(true);
+			if (_mode.HasValue)
+			{
+				query.SetCacheMode(_mode.Value);
+			}
+			if (_region!=null)
+			{
+				query.SetCacheRegion(_region);
+			}
+		}
+
+		
+	}
+
+	public class CommandTimeout : QueryOptions
+	{
+		private readonly int _seconds;
+
+		private CommandTimeout(int seconds)
+		{
+			_seconds = seconds;
+		}
+
+		public static CommandTimeout InSeconds(int seconds)
+		{
+			return new CommandTimeout(seconds);
+		}
+
+		protected override void ApplyToQuery(IQuery query)
+		{
+			query.SetTimeout(_seconds);
 		}
 	}
 }

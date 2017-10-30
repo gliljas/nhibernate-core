@@ -29,14 +29,8 @@ namespace NHibernate.Test.Linq
 
 			session.CreateQuery(Arg.Any<IQueryExpression>()).Returns(query);
 
-			var queryable = new NhQueryable<Order>(session).SetOptions(x=>
-				x
-					.SetCacheable(true)
-					.SetCacheMode(CacheMode.Normal)
-					.SetCacheRegion("testregion")
-					.SetTimeout(10)
-					
-			);
+			var queryable = new NhQueryable<Order>(session)
+				.WithOptions(QueryCache.Enabled.InRegion("testregion").WithMode(CacheMode.Normal));
 
 			var t = queryable.ToList();
 

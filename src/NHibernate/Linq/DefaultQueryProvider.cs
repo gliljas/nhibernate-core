@@ -149,23 +149,11 @@ namespace NHibernate.Linq
 			return nhLinqExpression;
 		}
 
-		private void ApplyOptions(IQuery query, NhQueryableOptions options)
+		private void ApplyOptions(IQuery query, IQueryOptions[] options)
 		{
-			if (options.Timeout.HasValue)
+			foreach (var option in options)
 			{
-				query.SetTimeout(options.Timeout.Value);
-			}
-			if (options.Cacheable.HasValue)
-			{
-				query.SetCacheable(options.Cacheable.Value);
-			}
-			if (options.CacheMode.HasValue)
-			{
-				query.SetCacheMode(options.CacheMode.Value);
-			}
-			if (options.CacheRegion != null)
-			{
-				query.SetCacheRegion(options.CacheRegion);
+				option.Apply(query);
 			}
 		}
 

@@ -32,9 +32,9 @@ namespace NHibernate.Test.Linq.Visitors
 	    {
 		    var orders = new List<Order>().AsQueryable();
 
-		    orders = orders.SetOptions(x => x.SetCacheable(true));
+		    orders = orders.WithOptions(QueryCache.Enabled);
 
-		    var queryModel = CreateQueryModel(orders);
+			var queryModel = CreateQueryModel(orders);
 
 			var operators = QueryOptionsExtractor.ExtractOptions(queryModel);
 
@@ -48,19 +48,20 @@ namespace NHibernate.Test.Linq.Visitors
 			var orders2 = new List<Order>().AsQueryable();
 		    var orderslines = new List<OrderLine>().AsQueryable();
 
-		    orderslines = orderslines.SetOptions(x => x.SetCacheRegion("Ignored"));
+		    orderslines = orderslines.WithOptions(QueryCache.Enabled.InRegion("Ignored"));
 
 		    var result = orders
-			    .SetOptions(x => x.SetCacheable(false))
-			    .Join(orders2.SetOptions(x => x.SetCacheable(false)), x => x.OrderId, x => x.OrderId, (x, y) => x)
-			    .SetOptions(x => x.SetCacheable(false))
+			    .WithOptions(QueryCache.Disabled)
+			    .Join(orders2.WithOptions(QueryCache.Disabled), x => x.OrderId, x => x.OrderId, (x, y) => x)
+			    .WithOptions(QueryCache.Disabled)
 			    .Where(o => orderslines.Any(s => s.Order == o))
-			    .SetOptions(x => x.SetCacheable(false))
+			    .WithOptions(QueryCache.Disabled)
 			    .SelectMany(x => x.OrderLines)
-			    .SetOptions(x => x.SetCacheable(false))
+			    .WithOptions(QueryCache.Disabled)
 			    .Select(x => new {Id = x.Id})
-			    .SetOptions(x => x.SetCacheable(true));
-				
+			    .WithOptions(QueryCache.Enabled);
+
+
 
 			var queryModel = CreateQueryModel(result);
 
@@ -71,14 +72,25 @@ namespace NHibernate.Test.Linq.Visitors
 
 			Assert.That(operators.Count, Is.EqualTo(5));
 
-		    var options = Substitute.For<IQueryableOptions>();
+		    var query = Substitute.For<IQuery>();
 
-			operators.Last().Invoke(options);
+			operators.Last().Apply(query);
 
-		    options.Received(1).SetCacheable(true);
-	    }
+		    query.Received(1).SetCacheable(true);
 
-	    private QueryModel CreateQueryModel<T>(IQueryable<T> queryable)
+			query.ClearReceivedCalls();
+
+		    foreach (var queryOptionse in operators)
+		    {
+				queryOptionse.Apply(query);
+			}
+		    query.Received(4).SetCacheable(false);
+		    query.Received(1).SetCacheable(true);
+		    query.Received(0).SetCacheRegion(Arg.Any<string>());
+
+		}
+
+		private QueryModel CreateQueryModel<T>(IQueryable<T> queryable)
 	    {
 		    return NhRelinqQueryParser.Parse(NhRelinqQueryParser.PreTransform(queryable.Expression));
 		}

@@ -12,12 +12,12 @@ namespace NHibernate.Linq.Visitors
 {
 	public class QueryOptionsExtractor
 	{
-		public static IReadOnlyCollection<Action<IQueryableOptions>> ExtractOptions(QueryModel queryModel)
+		public static IReadOnlyCollection<IQueryOptions> ExtractOptions(QueryModel queryModel)
 		{
 			var operators = new List<OptionsResultOperator>();
 			var rootFromClause = GetRootFromClause(queryModel);
 			ExtractOptionsAndAddToCollection(rootFromClause, queryModel, operators);
-			return operators.Select(x => x.SetOptions?.Value as Action<IQueryableOptions>).Where(x => x != null).ToList();
+			return operators.Select(x => x.SetOptions?.Value as IQueryOptions[]).Where(x => x != null).SelectMany(x=>x).ToList();
 		}
 
 		private static void ExtractOptionsAndAddToCollection(MainFromClause rootFromClause, QueryModel queryModel, ICollection<OptionsResultOperator> operators)

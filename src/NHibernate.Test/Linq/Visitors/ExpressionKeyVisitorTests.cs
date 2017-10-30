@@ -31,7 +31,7 @@ namespace NHibernate.Test.Linq.Visitors
 				});
 
 			var expression1 = new List<Order>().AsQueryable().Where(x => x.OrderId > 4).Expression;
-			var expression2 = new List<Order>().AsQueryable().Where(x => x.OrderId > 5).SetOptions(x => x.SetCacheable(true)).Expression;
+			var expression2 = new List<Order>().AsQueryable().Where(x => x.OrderId > 5).WithOptions(QueryCache.Enabled).Expression;
 
 			
 			var key1 = ExpressionKeyVisitor.Visit(expression1, parameterMap);

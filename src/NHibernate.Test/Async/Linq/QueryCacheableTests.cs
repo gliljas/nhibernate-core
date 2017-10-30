@@ -35,12 +35,12 @@ namespace NHibernate.Test.Linq
 
 			var x = await ((from c in db.Customers
 					 select c)
-				.SetOptions(o => o.SetCacheable(true))
+				.WithOptions(QueryCache.Enabled)
 				.ToListAsync());
 
 			var x2 = await ((from c in db.Customers
 					  select c)
-				.SetOptions(o => o.SetCacheable(true))
+				.WithOptions(QueryCache.Enabled)
 				.ToListAsync());
 
 			Assert.That(Sfi.Statistics.QueryExecutionCount, Is.EqualTo(1), "Unexpected execution count");
@@ -56,7 +56,7 @@ namespace NHibernate.Test.Linq
 
 			var x = await ((from c in db.Customers
 					 select c)
-				.SetOptions(o => o.SetCacheable(true))
+				.WithOptions(QueryCache.Enabled)
 				.ToListAsync());
 
 			var x2 = await ((from c in db.Customers
@@ -73,7 +73,7 @@ namespace NHibernate.Test.Linq
 			Sfi.Statistics.Clear();
 			await (Sfi.QueryCache.ClearAsync(CancellationToken.None));
 
-			var x = await ((from c in db.Customers.SetOptions(o => o.SetCacheable(true))
+			var x = await ((from c in db.Customers.WithOptions(QueryCache.Enabled)
 					 select c).ToListAsync());
 
 			var x2 = await ((from c in db.Customers
@@ -92,17 +92,17 @@ namespace NHibernate.Test.Linq
 
 			var x = await ((from c in db.Customers
 					 select c)
-				.SetOptions(o => o.SetCacheable(true).SetCacheRegion("test"))
+				.WithOptions(QueryCache.Enabled.InRegion("test"))
 				.ToListAsync());
 
 			var x2 = await ((from c in db.Customers
 					  select c)
-				.SetOptions(o => o.SetCacheable(true).SetCacheRegion("test"))
+				.WithOptions(QueryCache.Enabled.InRegion("test"))
 				.ToListAsync());
 
 			var x3 = await ((from c in db.Customers
 					  select c)
-				.SetOptions(o => o.SetCacheable(true).SetCacheRegion("other"))
+				.WithOptions(QueryCache.Enabled.InRegion("other"))
 				.ToListAsync());
 
 			Assert.That(Sfi.Statistics.QueryExecutionCount, Is.EqualTo(2), "Unexpected execution count");
@@ -117,7 +117,7 @@ namespace NHibernate.Test.Linq
 			await (Sfi.QueryCache.ClearAsync(CancellationToken.None));
 
 			await (db.Customers
-				.SetOptions(o => o.SetCacheable(true))
+				.WithOptions(QueryCache.Enabled)
 				.Where(c => c.ContactName != c.CompanyName).Take(1).ToListAsync());
 			await (db.Customers.Where(c => c.ContactName != c.CompanyName).Take(1).ToListAsync());
 
@@ -133,15 +133,15 @@ namespace NHibernate.Test.Linq
 			await (Sfi.QueryCache.ClearAsync(CancellationToken.None));
 
 			await (db.Customers
-				.SetOptions(o => o.SetCacheable(true).SetCacheRegion("test"))
+				.WithOptions(QueryCache.Enabled.InRegion("test"))
 				.Where(c => c.ContactName != c.CompanyName).Take(1)
 				.ToListAsync());
 			await (db.Customers
-				.SetOptions(o => o.SetCacheable(true).SetCacheRegion("test"))
+				.WithOptions(QueryCache.Enabled.InRegion("test"))
 				.Where(c => c.ContactName != c.CompanyName).Take(1)
 				.ToListAsync());
 			await (db.Customers
-				.SetOptions(o => o.SetCacheable(true).SetCacheRegion("other"))
+			    .WithOptions(QueryCache.Enabled.InRegion("other"))
 				.Where(c => c.ContactName != c.CompanyName).Take(1)
 				.ToListAsync());
 
@@ -158,11 +158,11 @@ namespace NHibernate.Test.Linq
 
 			await (db.Customers
 				.Where(c => c.ContactName != c.CompanyName).Take(1)
-				.SetOptions(o => o.SetCacheable(true).SetCacheRegion("test"))
+				.WithOptions(QueryCache.Enabled.InRegion("test"))
 				.ToListAsync());
 			await (db.Customers
 				.Where(c => c.ContactName != c.CompanyName).Take(1)
-				.SetOptions(o => o.SetCacheRegion("test").SetCacheable(true))
+			    .WithOptions(QueryCache.Enabled.InRegion("test"))
 				.ToListAsync());
 
 			Assert.That(Sfi.Statistics.QueryExecutionCount, Is.EqualTo(1), "Unexpected execution count");
@@ -180,7 +180,7 @@ namespace NHibernate.Test.Linq
 				.Customers
 				.GroupBy(x => x.Address.Country)
 				.Select(x => x.Key)
-				.SetOptions(o => o.SetCacheable(true))
+				.WithOptions(QueryCache.Enabled)
 				.ToListAsync());
 
 			c = await (db
@@ -193,7 +193,7 @@ namespace NHibernate.Test.Linq
 				.Customers
 				.GroupBy(x => x.Address.Country)
 				.Select(x => x.Key)
-				.SetOptions(o => o.SetCacheable(true))
+				.WithOptions(QueryCache.Enabled)
 				.ToListAsync());
 
 			Assert.That(Sfi.Statistics.QueryExecutionCount, Is.EqualTo(2), "Unexpected execution count");
@@ -209,7 +209,7 @@ namespace NHibernate.Test.Linq
 
 			var c = await (db
 				.Customers
-				.SetOptions(o => o.SetCacheable(true))
+				.WithOptions(QueryCache.Enabled)
 				.GroupBy(x => x.Address.Country)
 				.Select(x => x.Key)
 				.ToListAsync());
@@ -222,7 +222,7 @@ namespace NHibernate.Test.Linq
 
 			c = await (db
 				.Customers
-				.SetOptions(o => o.SetCacheable(true))
+				.WithOptions(QueryCache.Enabled)
 				.GroupBy(x => x.Address.Country)
 				.Select(x => x.Key)
 				.ToListAsync());

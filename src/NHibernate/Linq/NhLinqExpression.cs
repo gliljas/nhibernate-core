@@ -73,7 +73,7 @@ namespace NHibernate.Linq
 		
 		}
 
-		public NhQueryableOptions QueryOptions => _queryModelAndOptions.Value?.QueryableOptions;
+		internal IQueryOptions[] QueryOptions => _queryModelAndOptions.Value?.QueryableOptions;
 
 		public IASTNode Translate(ISessionFactoryImplementor sessionFactory, bool filter)
 		{
@@ -97,12 +97,10 @@ namespace NHibernate.Linq
 		private QueryModelWithExtractedOptions CreateQueryModelWithExtractedOptions()
 		{
 			var queryModel = NhRelinqQueryParser.Parse(_expression);
-			var options = new NhQueryableOptions();
-			QueryOptionsExtractor.ExtractOptions(queryModel).ForEach(x => x(options));
 			return new QueryModelWithExtractedOptions
 			{
 				QueryModel = queryModel,
-				QueryableOptions = options
+				QueryableOptions = QueryOptionsExtractor.ExtractOptions(queryModel).ToArray()
 			};
 		}
 
@@ -118,6 +116,6 @@ namespace NHibernate.Linq
 	internal class QueryModelWithExtractedOptions
 	{
 		internal QueryModel QueryModel { get; set; }
-		internal NhQueryableOptions QueryableOptions { get; set; }
+		internal IQueryOptions[] QueryableOptions { get; set; }
 	}
 }

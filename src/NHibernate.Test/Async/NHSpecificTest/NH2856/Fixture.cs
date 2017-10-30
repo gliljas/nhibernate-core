@@ -54,7 +54,7 @@ namespace NHibernate.Test.NHSpecificTest.NH2856
 			{
 				var query = session.Query<Person>()
 					.Fetch(p => p.Address)
-					.SetOptions(o => o.SetCacheable(true));
+					.WithOptions(QueryCache.Enabled);
 
 				Sfi.Statistics.Clear();
 

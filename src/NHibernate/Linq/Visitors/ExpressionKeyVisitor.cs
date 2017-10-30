@@ -176,7 +176,7 @@ namespace NHibernate.Linq.Visitors
 					break;
 			}
 
-			if (expression.Method.IsGenericMethod && expression.Method.GetGenericMethodDefinition()==LinqExtensionMethods.SetOptionsDefinition)
+			if (expression.Method.IsGenericMethod && expression.Method.GetGenericMethodDefinition()==LinqExtensionMethods.WithOptionsDefinition)
 			{
 				return Visit(expression.Arguments.First());
 			}

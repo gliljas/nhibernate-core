@@ -96,7 +96,7 @@ namespace NHibernate.Linq
 					}, typeof(AsQueryableExpressionNode)
 				);
 
-			methodInfoRegistry.Register(new[] { LinqExtensionMethods.SetOptionsDefinition }, typeof(OptionsExpressionNode));
+			methodInfoRegistry.Register(new[] { LinqExtensionMethods.WithOptionsDefinition }, typeof(OptionsExpressionNode));
 
 			var nodeTypeProvider = ExpressionTreeParser.CreateDefaultNodeTypeProvider();
 			nodeTypeProvider.InnerProviders.Add(methodInfoRegistry);
@@ -149,7 +149,7 @@ namespace NHibernate.Linq
 			}
 			else
 			{
-				var lambda = setOptions as Expression<Action<IQueryableOptions>>;
+				var lambda = setOptions as Expression<IQueryOptions[]>;
 				if (lambda!=null)
 				{
 					_setOptions = Expression.Constant(lambda.Compile());
