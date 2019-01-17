@@ -922,5 +922,16 @@ namespace NHibernate.Test.Linq.ByMethod
 			public bool HasSubgroups { get; set; }
 			public IEnumerable Items { get; set; }
 		}
+
+		[Test(Description = "GH-1982")]
+		public void ProjectJoinedKeyWithToString()
+		{
+			var result = db.OrderLines
+			               .GroupBy(x => new {x.Order.OrderId,x.Order.OrderDate})
+			               .Select(x => new { OrderIdString = x.Key.OrderId.ToString(), x.Key.OrderDate, Count=x.Count() })
+			               .ToArray();
+
+			Assert.True(result.Any());
+		}
 	}
 }
