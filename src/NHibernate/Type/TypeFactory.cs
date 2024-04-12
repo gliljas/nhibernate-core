@@ -343,6 +343,15 @@ namespace NHibernate.Type
 			// object needs to have both class and serializable setup before it can
 			// be created.
 			RegisterType(typeof (Object), NHibernateUtil.Object, new[] {"object"});
+
+
+#if NET6_0_OR_GREATER
+			RegisterType(typeof(DateOnly), NHibernateUtil.DateOnlyAsDate, new[] { "dateonly", "dateonlyasdate" });
+
+			RegisterType(typeof(TimeOnly), NHibernateUtil.TimeOnlyAsTime, new[] { "timeonly", "timeonlyastime" },
+				s => GetType(NHibernateUtil.TimeOnlyAsTime, s, scale => new TimeOnlyAsTimeType((byte) scale)),
+				false);
+#endif
 		}
 
 		/// <summary>
@@ -397,6 +406,17 @@ namespace NHibernate.Type
 						 l =>
 						 GetType(NHibernateUtil.Serializable, l,
 								 len => new SerializableType(typeof (object), SqlTypeFactory.GetBinary(len))));
+
+#if NET6_0_OR_GREATER
+			RegisterType(NHibernateUtil.TimeOnlyAsDateTime, new[] { "timeonlyasdatetime" },
+				s => GetType(NHibernateUtil.TimeOnlyAsDateTime, s, scale => new TimeOnlyAsDateTimeType((byte) scale)),
+				false);
+
+			RegisterType(NHibernateUtil.TimeOnlyAsTicks, new[] { "timeonlyasticks" },
+				s => GetType(NHibernateUtil.TimeOnlyAsTicks, s, scale => new TimeOnlyAsTicksType((byte) scale)),
+				false);
+#endif
+
 		}
 
 		private static ICollectionTypeFactory CollectionTypeFactory =>
