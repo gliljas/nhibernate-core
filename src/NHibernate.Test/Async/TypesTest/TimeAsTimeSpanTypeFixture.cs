@@ -9,6 +9,8 @@
 
 
 using System;
+using NHibernate.Cfg;
+using NHibernate.Mapping.ByCode;
 using NHibernate.Type;
 using NUnit.Framework;
 
@@ -43,11 +45,26 @@ namespace NHibernate.Test.TypesTest
 	}
 
 	[TestFixture]
-	public class TimeSpanFixture2Async : TypeFixtureBase
+	public class TimeSpanFixture2Async : TimeOrDateTypeFixtureBase<TimeAsTimeSpanClass, TimeAsTimeSpanType>
 	{
-		protected override string TypeName
+		protected override void AddMappingsToModelMapper(ModelMapper mapper)
 		{
-			get { return "TimeAsTimeSpan"; }
+			mapper.Class<TimeAsTimeSpanClass>(m =>
+			{
+				m.Table("bc_timespan");
+				m.Lazy(false);
+				m.Id(p => p.Id, p => p.Generator(Generators.Native));
+				m.Property(p => p.TimeSpanValue,
+					p => p.Type<TimeAsTimeSpanType>()
+				);
+				m.Property(p => p.TimeSpanWithScale,
+					p =>
+					{
+						p.Type<TimeAsTimeSpanType>();
+						p.Scale(ScaleFromDateAccuracyInTicks);
+					}
+				);
+			});
 		}
 
 		[Test]
@@ -84,13 +101,13 @@ namespace NHibernate.Test.TypesTest
 		[Test]
 		public async Task LowerDigitsAreIgnoredAsync()
 		{
-			if (!Dialect.SupportsDateTimeScale)
-				Assert.Ignore("Lower digits cannot be ignored when dialect does not support scale");
+			if (DateAccuracyInTicks == TimeSpan.TicksPerSecond)
+				Assert.Ignore("The dialect doesn't support fractional seconds");
 
-			var baseTime = new TimeSpan(0, 17, 55, 24, 548);
+			var baseTime = new TimeSpan(0, 17, 55, 24);
 			var entity = new TimeAsTimeSpanClass
 			{
-				TimeSpanWithScale = baseTime.Add(TimeSpan.FromTicks(TimeSpan.TicksPerMillisecond / 3))
+				TimeSpanWithScale = baseTime.Add(TimeSpan.FromTicks(DateAccuracyInTicks / 10))
 			};
 			Assert.That(entity.TimeSpanWithScale, Is.Not.EqualTo(baseTime));
 

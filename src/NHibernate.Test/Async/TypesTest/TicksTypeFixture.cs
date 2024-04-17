@@ -16,10 +16,9 @@ namespace NHibernate.Test.TypesTest
 {
 	using System.Threading.Tasks;
 	[TestFixture]
-	public class TicksTypeFixtureAsync : AbstractDateTimeTypeFixtureAsync
+	public class TicksTypeFixtureAsync : AbstractDateTimeTypeFixtureAsync<TicksType>
 	{
-		protected override string TypeName => "Ticks";
-		protected override AbstractDateTimeType Type => NHibernateUtil.Ticks;
+		protected override TicksType Type => NHibernateUtil.Ticks;
 
 		[Test]
 		[TestCase("0")]

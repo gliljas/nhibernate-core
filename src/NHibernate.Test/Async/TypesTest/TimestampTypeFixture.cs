@@ -17,9 +17,8 @@ namespace NHibernate.Test.TypesTest
 	using System.Threading.Tasks;
 	[TestFixture]
 	[Obsolete]
-	public class TimestampTypeFixtureAsync : AbstractDateTimeTypeFixtureAsync
+	public class TimestampTypeFixtureAsync : AbstractDateTimeTypeFixtureAsync<TimestampType>
 	{
-		protected override string TypeName => "Timestamp";
-		protected override AbstractDateTimeType Type => NHibernateUtil.Timestamp;
+		protected override TimestampType Type => NHibernateUtil.Timestamp;
 	}
 }

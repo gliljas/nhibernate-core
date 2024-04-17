@@ -11,7 +11,7 @@ namespace NHibernate.Test.TypesTest
 	/// </summary>
 	[TestFixture]
 	[Obsolete]
-	public class DateTime2TypeFixture : AbstractDateTimeTypeFixture
+	public class DateTime2TypeFixture : AbstractDateTimeTypeFixture<DateTime2Type>
 	{
 		protected override bool AppliesTo(Dialect.Dialect dialect) =>
 			TestDialect.SupportsSqlType(SqlTypeFactory.DateTime2);
@@ -20,8 +20,7 @@ namespace NHibernate.Test.TypesTest
 			// Cannot handle DbType.DateTime2 via .Net ODBC.
 			!(factory.ConnectionProvider.Driver is OdbcDriver);
 
-		protected override string TypeName => "DateTime2";
-		protected override AbstractDateTimeType Type => NHibernateUtil.DateTime2;
+		protected override DateTime2Type Type => NHibernateUtil.DateTime2;
 
 		[Test]
 		public void ObsoleteMessage()
@@ -38,7 +37,7 @@ namespace NHibernate.Test.TypesTest
 
 	[TestFixture]
 	[Obsolete]
-	public class DateTime2TypeWithScaleFixture : DateTimeTypeWithScaleFixture
+	public class DateTime2TypeWithScaleFixture : AbstractDateTimeTypeFixture<DateTime2Type>
 	{
 		protected override bool AppliesTo(Dialect.Dialect dialect) =>
 			TestDialect.SupportsSqlType(SqlTypeFactory.DateTime2);
@@ -47,7 +46,6 @@ namespace NHibernate.Test.TypesTest
 			// Cannot handle DbType.DateTime2 via .Net ODBC.
 			!(factory.ConnectionProvider.Driver is OdbcDriver);
 
-		protected override string TypeName => "DateTime2WithScale";
-		protected override AbstractDateTimeType Type => (AbstractDateTimeType)TypeFactory.GetDateTime2Type(3);
+		protected override DateTime2Type Type => (DateTime2Type) TypeFactory.GetDateTime2Type(ScaleFromDateAccuracyInTicks);
 	}
 }

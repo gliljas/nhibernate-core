@@ -2406,6 +2406,7 @@ namespace NHibernate.Dialect
 		/// <summary>
 		/// Does this dialect handles date and time types scale (fractional seconds precision)?
 		/// </summary>
+		[Obsolete("No longer used")]
 		public virtual bool SupportsDateTimeScale => false;
 
 		#endregion

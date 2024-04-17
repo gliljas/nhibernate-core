@@ -16,10 +16,9 @@ namespace NHibernate.Test.TypesTest
 {
 	using System.Threading.Tasks;
 	[TestFixture]
-	public class DbTimestampTypeFixtureAsync : AbstractDateTimeTypeFixtureAsync
+	public class DbTimestampTypeFixtureAsync : AbstractDateTimeTypeFixtureAsync<DbTimestampType>
 	{
-		protected override string TypeName => "DbTimestamp";
-		protected override AbstractDateTimeType Type => NHibernateUtil.DbTimestamp;
+		protected override DbTimestampType Type => NHibernateUtil.DbTimestamp;
 		protected override DateTime Now => (DateTime)Type.Seed(_session?.GetSessionImplementation());
 		private ISession _session;
 

@@ -7,23 +7,20 @@ namespace NHibernate.Test.TypesTest
 	/// The Unit Tests for the LocalDateTimeType.
 	/// </summary>
 	[TestFixture]
-	public class LocalDateTimeTypeFixture : AbstractDateTimeTypeFixture
+	public class LocalDateTimeTypeFixture : AbstractDateTimeTypeFixture<LocalDateTimeType>
 	{
-		protected override string TypeName => "LocalDateTime";
-		protected override AbstractDateTimeType Type => NHibernateUtil.LocalDateTime;
+		protected override LocalDateTimeType Type => NHibernateUtil.LocalDateTime;
 	}
 
 	[TestFixture]
-	public class LocalDateTimeTypeWithScaleFixture : DateTimeTypeWithScaleFixture
+	public class LocalDateTimeTypeWithScaleFixture : AbstractDateTimeTypeWithScaleFixture<LocalDateTimeType>
 	{
-		protected override string TypeName => "LocalDateTimeWithScale";
-		protected override AbstractDateTimeType Type => (AbstractDateTimeType)TypeFactory.GetLocalDateTimeType(3);
+		protected override LocalDateTimeType Type => (LocalDateTimeType) TypeFactory.GetLocalDateTimeType(ScaleFromDateAccuracyInTicks);
 	}
 
 	[TestFixture]
-	public class LocalDateTimeNoMsTypeFixture : DateTimeNoMsTypeFixture
+	public class LocalDateTimeNoMsTypeFixture : AbstractDateTimeNoMsTypeFixture<LocalDateTimeNoMsType>
 	{
-		protected override string TypeName => "LocalDateTimeNoMs";
-		protected override AbstractDateTimeType Type => NHibernateUtil.LocalDateTimeNoMs;
+		protected override LocalDateTimeNoMsType Type => NHibernateUtil.LocalDateTimeNoMs;
 	}
 }

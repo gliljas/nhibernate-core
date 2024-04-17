@@ -15,9 +15,6 @@ namespace NHibernate.Dialect
 		public override long TimestampResolutionInTicks => 10;
 
 		/// <inheritdoc />
-		public override bool SupportsDateTimeScale => true;
-
-		/// <inheritdoc />
 		public override bool SupportsRowValueConstructorSyntaxInInList => true;
 	}
 }

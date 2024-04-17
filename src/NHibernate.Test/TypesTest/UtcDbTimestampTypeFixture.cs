@@ -5,10 +5,9 @@ using NUnit.Framework;
 namespace NHibernate.Test.TypesTest
 {
 	[TestFixture]
-	public class UtcDbTimestampTypeFixture : AbstractDateTimeTypeFixture
+	public class UtcDbTimestampTypeFixture : AbstractDateTimeTypeFixture<UtcDbTimestampType>
 	{
-		protected override string TypeName => "UtcDbTimestamp";
-		protected override AbstractDateTimeType Type => NHibernateUtil.UtcDbTimestamp;
+		protected override UtcDbTimestampType Type => NHibernateUtil.UtcDbTimestamp;
 		protected override DateTime Now => (DateTime) Type.Seed(_session?.GetSessionImplementation());
 		private ISession _session;
 

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Data;
 using NHibernate.Dialect.Function;
 using NHibernate.Driver;
@@ -104,8 +104,5 @@ namespace NHibernate.Dialect
 					: SqlTypeFactory.DateTime2
 				: type;
 		}
-
-		/// <inheritdoc />
-		public override bool SupportsDateTimeScale => !KeepDateTime;
 	}
 }

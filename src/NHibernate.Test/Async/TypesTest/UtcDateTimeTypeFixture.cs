@@ -18,23 +18,20 @@ namespace NHibernate.Test.TypesTest
 	/// The Unit Tests for the UtcDateTimeType.
 	/// </summary>
 	[TestFixture]
-	public class UtcDateTimeTypeFixtureAsync : AbstractDateTimeTypeFixtureAsync
+	public class UtcDateTimeTypeFixtureAsync : AbstractDateTimeTypeFixtureAsync<UtcDateTimeType>
 	{
-		protected override string TypeName => "UtcDateTime";
-		protected override AbstractDateTimeType Type => NHibernateUtil.UtcDateTime;
+		protected override UtcDateTimeType Type => NHibernateUtil.UtcDateTime;
 	}
 
 	[TestFixture]
-	public class UtcDateTimeTypeWithScaleFixtureAsync : DateTimeTypeWithScaleFixtureAsync
+	public class UtcDateTimeTypeWithScaleFixtureAsync : AbstractDateTimeTypeWithScaleFixtureAsync<UtcDateTimeType>
 	{
-		protected override string TypeName => "UtcDateTimeWithScale";
-		protected override AbstractDateTimeType Type => (AbstractDateTimeType)TypeFactory.GetUtcDateTimeType(3);
+		protected override UtcDateTimeType Type => (UtcDateTimeType) TypeFactory.GetUtcDateTimeType(ScaleFromDateAccuracyInTicks);
 	}
 
 	[TestFixture]
-	public class UtcDateTimeNoMsTypeFixtureAsync : DateTimeNoMsTypeFixtureAsync
+	public class UtcDateTimeNoMsTypeFixtureAsync : AbstractDateTimeNoMsTypeFixtureAsync<UtcDateTimeNoMsType>
 	{
-		protected override string TypeName => "UtcDateTimeNoMs";
-		protected override AbstractDateTimeType Type => NHibernateUtil.UtcDateTimeNoMs;
+		protected override UtcDateTimeNoMsType Type => NHibernateUtil.UtcDateTimeNoMs;
 	}
 }

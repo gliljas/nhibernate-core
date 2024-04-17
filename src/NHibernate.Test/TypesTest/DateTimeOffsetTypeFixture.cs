@@ -3,6 +3,7 @@ using System.Data;
 using System.Linq;
 using NHibernate.Cfg;
 using NHibernate.Driver;
+using NHibernate.Mapping.ByCode;
 using NHibernate.SqlTypes;
 using NHibernate.Tool.hbm2ddl;
 using NHibernate.Type;
@@ -12,9 +13,8 @@ using NUnit.Framework;
 namespace NHibernate.Test.TypesTest
 {
 	[TestFixture]
-	public class DateTimeOffsetTypeFixture : TypeFixtureBase
+	public class DateTimeOffsetTypeFixture : TimeOrDateTypeFixtureBase<DateTimeOffsetClass,DateTimeOffsetType>
 	{
-		protected override string TypeName => "DateTimeOffset";
 		protected virtual DateTimeOffsetType Type => NHibernateUtil.DateTimeOffset;
 		protected virtual bool RevisionCheck => true;
 
@@ -38,6 +38,49 @@ namespace NHibernate.Test.TypesTest
 			configuration.SetProperty(
 				Cfg.Environment.ConnectionDriver,
 				typeof(ClientDriverWithParamsStats).AssemblyQualifiedName);
+		}
+
+		protected override void AddMappingsToModelMapper(ModelMapper mapper)
+		{
+			mapper.Class<DateTimeOffsetClass>(m =>
+			{
+				m.Table("bc_datetimeoffset");
+				m.Lazy(false);
+				m.Id(p => p.Id, p => p.Generator(Generators.Assigned));
+				m.Property(p => p.Value,
+					p =>
+					{
+						p.Type(Type);
+						if (Type.SqlType.ScaleDefined)
+						{
+							p.Scale(Type.SqlType.Scale);
+						}
+						p.NotNullable(true);
+					}
+				);
+				m.Property(p => p.NullableValue,
+					p =>
+					{
+						p.Type(Type);
+						if (Type.SqlType.ScaleDefined)
+						{
+							p.Scale(Type.SqlType.Scale);
+						}
+					}
+				);
+				m.Version(p => p.Revision,
+					p =>
+					{
+						p.Type(Type);
+						if (Type.SqlType.ScaleDefined)
+						{
+							p.Column(x => x.Scale(Type.SqlType.Scale));
+						}
+					}
+				);
+			});
+
+			var mapping = mapper.CompileMappingForAllExplicitlyAddedEntities();
 		}
 
 		protected override void OnSetUp()
@@ -329,7 +372,7 @@ namespace NHibernate.Test.TypesTest
 			}
 		}
 
-		protected virtual long DateAccuracyInTicks => Dialect.TimestampResolutionInTicks;
+		protected override long DateAccuracyInTicks => Dialect.TimestampResolutionInTicks;
 
 		protected virtual DateTimeOffset Now => DateTimeOffset.Now;
 
@@ -364,9 +407,9 @@ namespace NHibernate.Test.TypesTest
 	[TestFixture]
 	public class DateTimeOffsetTypeWithScaleFixture : DateTimeOffsetTypeFixture
 	{
-		protected override string TypeName => "DateTimeOffsetWithScale";
-		protected override DateTimeOffsetType Type => (DateTimeOffsetType)TypeFactory.GetDateTimeOffsetType(3);
+		protected override DateTimeOffsetType Type => (DateTimeOffsetType)TypeFactory.GetDateTimeOffsetType(ScaleFromDateAccuracyInTicks);
 		protected override long DateAccuracyInTicks => Math.Max(TimeSpan.TicksPerMillisecond, base.DateAccuracyInTicks);
+		
 		// The timestamp rounding in seeding does not account scale.
 		protected override bool RevisionCheck => false;
 
@@ -381,14 +424,14 @@ namespace NHibernate.Test.TypesTest
 		[Test]
 		public void LowerDigitsAreIgnored()
 		{
-			if (!Dialect.SupportsDateTimeScale)
-				Assert.Ignore("Lower digits cannot be ignored when dialect does not support scale");
+			if (DateAccuracyInTicks == TimeSpan.TicksPerSecond)
+				Assert.Ignore("The dialect doesn't support fractional seconds");
 
-			var baseDate = new DateTimeOffset(2017, 10, 01, 17, 55, 24, 548, TimeSpan.FromHours(2));
+			var baseDate = new DateTimeOffset(2017, 10, 01, 17, 55, 24, TimeSpan.FromHours(2));
 			var entity = new DateTimeOffsetClass
 			{
 				Id = AdditionalDateId,
-				Value = baseDate.AddTicks(TimeSpan.TicksPerMillisecond / 3)
+				Value = baseDate.AddTicks(DateAccuracyInTicks / 10)
 			};
 			Assert.That(entity.Value, Is.Not.EqualTo(baseDate));
 

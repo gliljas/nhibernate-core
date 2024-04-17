@@ -20,10 +20,9 @@ namespace NHibernate.Test.TypesTest
 	using System.Threading;
 
 	[TestFixture]
-	public class DateTypeFixtureAsync : AbstractDateTimeTypeFixtureAsync
+	public class DateTypeFixtureAsync : AbstractDateTimeTypeFixtureAsync<DateType>
 	{
-		protected override string TypeName => "Date";
-		protected override AbstractDateTimeType Type => NHibernateUtil.Date;
+		protected override DateType Type => NHibernateUtil.Date;
 		protected override bool RevisionCheck => false;
 		protected override long DateAccuracyInTicks => TimeSpan.TicksPerDay;
 

@@ -18,6 +18,7 @@ using NHibernate.AdoNet;
 using NHibernate.Cfg;
 using NHibernate.Driver;
 using NHibernate.Engine;
+using NHibernate.Mapping.ByCode;
 using NHibernate.SqlCommand;
 using NHibernate.SqlTypes;
 using NHibernate.Tool.hbm2ddl;
@@ -30,9 +31,9 @@ namespace NHibernate.Test.TypesTest
 	using System.Threading.Tasks;
 	using System.Threading;
 	[TestFixture]
-	public abstract class AbstractDateTimeTypeFixtureAsync : TypeFixtureBase
+	public abstract class AbstractDateTimeTypeFixtureAsync<TTestType> : TimeOrDateTypeFixtureBase<DateTimeClass, TTestType> where TTestType : AbstractDateTimeType
 	{
-		protected abstract AbstractDateTimeType Type { get; }
+		protected abstract TTestType Type { get; }
 		protected virtual bool RevisionCheck => true;
 
 		protected const int DateId = 1;
@@ -50,6 +51,46 @@ namespace NHibernate.Test.TypesTest
 				typeof(ClientDriverWithParamsStats).AssemblyQualifiedName);
 		}
 
+		protected override void AddMappingsToModelMapper(ModelMapper mapper)
+		{
+			mapper.Class<DateTimeClass>(m =>
+			{
+				m.Table("bc_datetime");
+				m.Lazy(false);
+				m.Id(p => p.Id, p => p.Generator(Generators.Assigned));
+				m.Property(p => p.Value,
+					p =>
+					{
+						p.Type<TTestType>();
+						if (Type.SqlType.ScaleDefined)
+						{
+							p.Scale(Type.SqlType.Scale);
+						}
+						p.NotNullable(true);
+					}
+				);
+				m.Property(p => p.NullableValue,
+					p =>
+					{
+						p.Type<TTestType>();
+						if (Type.SqlType.ScaleDefined)
+						{
+							p.Scale(Type.SqlType.Scale);
+						}
+					}
+				);
+				m.Version(p => p.Revision,
+					p =>
+					{
+						p.Type(Type);
+						if (Type.SqlType.ScaleDefined)
+						{
+							p.Column(x => x.Scale(Type.SqlType.Scale));
+						}
+					}
+				);
+			});
+		}
 		protected override void OnSetUp()
 		{
 			base.OnSetUp();
@@ -65,14 +106,6 @@ namespace NHibernate.Test.TypesTest
 				s.Save(d);
 				t.Commit();
 			}
-		}
-
-		protected override void OnTearDown()
-		{
-			using var s = OpenSession();
-			using var t = s.BeginTransaction();
-			s.CreateQuery("delete from DateTimeClass").ExecuteUpdate();
-			t.Commit();
 		}
 
 		protected override void DropSchema()
@@ -426,7 +459,7 @@ namespace NHibernate.Test.TypesTest
 			}
 		}
 
-		protected virtual long DateAccuracyInTicks => Dialect.TimestampResolutionInTicks;
+		protected override long DateAccuracyInTicks => Dialect.TimestampResolutionInTicks;
 
 		protected virtual DateTime Now => GetTypeKind() == DateTimeKind.Utc ? DateTime.UtcNow : DateTime.Now;
 

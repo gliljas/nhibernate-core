@@ -33,10 +33,9 @@ namespace NHibernate.Test.TypesTest
 	}
 
 	[TestFixture]
-	public class DateTypeFixture : AbstractDateTimeTypeFixture
+	public class DateTypeFixture : AbstractDateTimeTypeFixture<DateType>
 	{
-		protected override string TypeName => "Date";
-		protected override AbstractDateTimeType Type => NHibernateUtil.Date;
+		protected override DateType Type => NHibernateUtil.Date;
 		protected override bool RevisionCheck => false;
 		protected override long DateAccuracyInTicks => TimeSpan.TicksPerDay;
 
